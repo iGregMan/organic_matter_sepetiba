@@ -1,3 +1,4 @@
+# Name of libraries to call/install
 libs_to_call <- list(
 
   "data.table",
@@ -7,45 +8,44 @@ libs_to_call <- list(
   "remotes",
   "reshape2",
   "stringr",
-  "tidyverse"
+  "tidyverse",
+  "usdm"
 
 )
 
-lapply(libs_to_call, function(i) {
+# loading/installation of libraries
+lapply(
+  libs_to_call,
 
-  bool <- is.element(i, .packages(all.available = TRUE))
+  function(i) {
 
-  if (!bool) {
-    install.packages(i)
-  }
+    bool <- is.element(i, .packages(all.available = TRUE))
 
-  library(i, character.only = TRUE)
+    if (!bool) {
+      install.packages(i)
+    }
 
-}
-)
+    library(i, character.only = TRUE)
+
+  })
 
 
-# remote_libs_to_call <- list(
-#   "rbbt"
-# )
-#
-# github_accounts <- list(
-#   "paleolimbot"
-# )
-#
-# mapply(
-#   function(pckg, usr) {
-#
-#     bool <- is.element(pckg, .packages(all.available = TRUE))
-#
-#     if (!bool) {
-#       remotes::install_github(paste0(usr, "/", pckg))
-#     }
-#
-#     library(pckg, character.only = TRUE)
-#
-#   },
-#   remote_libs_to_call,
-#   github_accounts,
-#   SIMPLIFY = FALSE
-# )
+# Import fatty acids data
+d <- read.csv(here("data", "raw", "acidos_graxos.csv"), sep = ";")
+names(d)[1] <- "site"
+# row.names(d) <- d$X
+# d <- d[, -1]
+
+# import environmental data
+e <- read.csv(here("data", "raw", "environmental_data.csv"), sep = ";")
+names(e)[1] <- "site"
+
+# import correspondance site/campaign/area
+s <- read.csv(here("data", "raw", "site_season_area.csv"), sep = ";")
+s <- s[, 1:3]
+names(s) <- c("campaign", "area", "site")
+s$campaign <- substr(s$campaign, 2, 2)
+s$area <- substr(s$area, 1, 3)
+s$campaignXarea <- paste0(s$area, s$campaign)
+# One site is missing
+s <- s %>% rbind(list("2", "SEP", 201, "SEP2"))
